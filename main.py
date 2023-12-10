@@ -1,5 +1,6 @@
 import os
 import sys
+import time
 
 import pygame
 import random
@@ -38,11 +39,43 @@ class Bomb(pygame.sprite.Sprite):
     image = load_image("bomb.png")
     image_boom = load_image("boom.png")
 
-    def __init__(self, group, corner):
+    def __init__(self, group, corner, args=(300, -400, 400, 15)):
         # НЕОБХОДИМО вызвать конструктор родительского класса Sprite.
         # Это очень важно !!!
         super().__init__(group)
         self.image = Bomb.image
+        self.rect = self.image.get_rect()
+        self.corner = corner
+        self.side, self.center_x, self.center_y, self.v_main = args
+        self.rect.x = self.center_x + int(self.side * cos(self.corner * pi / 180)) - 25
+        self.rect.y = self.center_y + int(self.side * sin(self.corner * pi / 180)) - 25
+        self.clock1 = pygame.time.Clock()
+        self.clock2 = pygame.time.Clock()
+        self.v_x = 25
+
+    def update(self):
+        global death
+        self.corner += self.v_main * self.clock1.tick() / 100
+        self.corner %= 360
+        self.center_x += self.v_x * self.clock2.tick() / 100
+        self.rect.x = self.center_x + int(self.side * cos(self.corner * pi / 180)) - 25
+        self.rect.y = self.center_y + int(self.side * sin(self.corner * pi / 180)) - 25
+        if self.rect.colliderect(sprite.rect):
+            screen.fill((255, 0, 0))
+            text(screen, 'death', (0, 0))
+            self.image = self.image_boom
+            death = True
+
+
+class Bomb2(pygame.sprite.Sprite):
+    image = load_image("bomb.png")
+    image_boom = load_image("boom.png")
+
+    def __init__(self, group, corner):
+        # НЕОБХОДИМО вызвать конструктор родительского класса Sprite.
+        # Это очень важно !!!
+        super().__init__(group)
+        self.image = Bomb2.image
         self.rect = self.image.get_rect()
         self.corner = corner
         self.center_x = -400
@@ -57,7 +90,7 @@ class Bomb(pygame.sprite.Sprite):
 
     def update(self):
         global death, score
-        self.image = Bomb.image
+        self.image = Bomb2.image
         if start:
             self.corner += self.v_main * self.clock1.tick() / 100
             self.corner %= 360
@@ -198,12 +231,13 @@ def level_with_bombs():
 
     corners = (30, 150, 270)
     for i in range(3):
-        Bomb(all_sprites, corners[i])
+        Bomb2(all_sprites, corners[i])
 
     stop_all = False
     all_sprites.draw(screen)
     screen.fill((0, 0, 255))
     start = True
+    score = 0
     while running_level_with_bombs:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -220,7 +254,7 @@ def level_with_bombs():
                 corners = (30, 150, 270)
                 score = 0
                 for i in range(3):
-                    Bomb(all_sprites, corners[i])
+                    Bomb2(all_sprites, corners[i])
 
             if event.type == pygame.KEYDOWN and event.key == pygame.K_DOWN and not sprite.go_down:
                 main_sprite.update(event)
@@ -251,6 +285,94 @@ def level_with_bombs():
             main_sprite.draw(screen)
             pygame.display.flip()
         else:
+            text(screen, 'death', (0, 0))
+    if stop_all:
+        pygame.quit()
+        return False
+    return True
+
+
+def level_with_bombs1():
+    global start, death, score, screen
+    running_level_with_bombs1 = True
+    center = (400, 400)
+    all_sprites = pygame.sprite.Group()
+
+    text(screen, 'score: ' + str(score), (0, 0))
+
+    corners = (30, 150, 270)
+    sprite_bomb1 = Bomb(all_sprites, corners[0])
+    for i in range(2):
+        Bomb(all_sprites, corners[i + 1])
+
+    stop_all = False
+    all_sprites.draw(screen)
+    screen.fill('#7986CB')
+    start = True
+    death = False
+    while running_level_with_bombs1:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running_level_with_bombs1 = False
+                stop_all = True
+            # if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE and start:
+            #     start = False
+            # elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE and not start:
+            #     start = True
+
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_q and death:
+                death = False
+                all_sprites = pygame.sprite.Group()
+                corners = (30, 150, 270)
+                score = 0
+
+                sprite_bomb1 = Bomb(all_sprites, corners[0])
+                for i in range(2):
+                    Bomb(all_sprites, corners[i + 1])
+
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_DOWN and not sprite.go_down and not death:
+                main_sprite.update(event)
+            elif event.type == pygame.KEYUP and event.key == pygame.K_DOWN and sprite.go_down and not death:
+                main_sprite.update(event)
+
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_UP and not sprite.go_up and not death:
+                main_sprite.update(event)
+            elif event.type == pygame.KEYUP and event.key == pygame.K_UP and sprite.go_up and not death:
+                main_sprite.update(event)
+
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT and not sprite.go_left and not death:
+                main_sprite.update(event)
+            elif event.type == pygame.KEYUP and event.key == pygame.K_LEFT and sprite.go_left and not death:
+                main_sprite.update(event)
+
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT and not sprite.go_right and not death:
+                main_sprite.update(event)
+            elif event.type == pygame.KEYUP and event.key == pygame.K_RIGHT and sprite.go_right and not death:
+                main_sprite.update(event)
+
+        if not death:
+            screen.fill('#7986CB')
+            text(screen, 'score: ' + str(score), (0, 0))
+            if sprite_bomb1.center_x >= 800 + sprite_bomb1.side + 50:
+                score += 3
+                text(screen, 'score: ' + str(score), (0, 0))
+                if score >= 36:
+                    return True
+                side = random.randint(75, 320)
+                center_x = -side - 40
+                v_main = random.randint(5, 15)
+                center_y = random.randint(side, 800 - side)
+                all_sprites = pygame.sprite.Group()
+                sprite_bomb1 = Bomb(all_sprites, corners[0], (side, center_x, center_y, v_main))
+                for i in range(2):
+                    Bomb(all_sprites, corners[i + 1], (side, center_x, center_y, v_main))
+            all_sprites.update()
+            all_sprites.draw(screen)
+            main_sprite.update()
+            main_sprite.draw(screen)
+            pygame.display.flip()
+        else:
+            screen.fill((255, 0, 0))
             text(screen, 'death', (0, 0))
     if stop_all:
         pygame.quit()
@@ -321,7 +443,15 @@ if __name__ == '__main__':
         # следующий уровень
         start = False
         death = False
-        if level_with_bombs():  # опять проверяем, закрыто ли окно
+        if level_with_bombs1():  # опять проверяем, закрыто ли окно
             # следующий уровень
-            pass
+            time1 = time.time()
+            while True:
+                screen.fill('#673AB7')
+                text(screen, 'Поздравляем! Вы прошли этот уровень', (50, 200), 30)
+                if time.time() - time1 >= 5:
+                    break
+                pygame.display.flip()
+            if level_with_bombs():
+                pass
 
