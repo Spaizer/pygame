@@ -28,23 +28,10 @@ def load_image(name, colorkey=None):
     return image
 
 
-def score_f(screen, flag=False):
-    if not flag:
-        font = pygame.font.Font(None, 50)
-        text = font.render('score: ' + str(score), True, (0, 0, 0))
-        text_x = 0
-        text_y = 0
-        text_w = text.get_width()
-        text_h = text.get_height()
-        screen.blit(text, (text_x, text_y))
-    else:
-        font = pygame.font.Font(None, 50)
-        text = font.render('death', True, (0, 0, 0))
-        text_x = 0
-        text_y = 0
-        text_w = text.get_width()
-        text_h = text.get_height()
-        screen.blit(text, (text_x, text_y))
+def text(screen, text, pos, font=50):
+    font = pygame.font.Font(None, font)
+    text = font.render(text, True, (0, 0, 0))
+    screen.blit(text, pos)
 
 
 class Bomb(pygame.sprite.Sprite):
@@ -77,7 +64,7 @@ class Bomb(pygame.sprite.Sprite):
             self.center_x += self.v_x * self.clock2.tick() / 100
             if self.center_x >= 800 + self.side + 50:
                 score += 1
-                score_f(screen)
+                text(screen, 'score: ' + str(score), (0, 0))
                 self.side = random.randint(75, 320)
                 self.center_x = -self.side - 40
                 self.v_main = random.randint(5, 15)
@@ -88,7 +75,7 @@ class Bomb(pygame.sprite.Sprite):
             self.rect.y = self.center_y + int(self.side * sin(self.corner * pi / 180)) - 25
             if self.rect.colliderect(sprite.rect):
                 screen.fill((255, 0, 0))
-                score_f(screen, True)
+                text(screen, 'death', (0, 0))
                 self.image = self.image_boom
                 death = True
 
@@ -207,7 +194,7 @@ def level_with_bombs():
     center = (400, 400)
     all_sprites = pygame.sprite.Group()
 
-    score_f(screen)
+    text(screen, 'score: ' + str(score), (0, 0))
 
     corners = (30, 150, 270)
     for i in range(3):
@@ -257,14 +244,14 @@ def level_with_bombs():
 
         if not death:
             screen.fill((0, 0, 255))
-            score_f(screen)
+            text(screen, 'score: ' + str(score), (0, 0))
             all_sprites.update()
             all_sprites.draw(screen)
             main_sprite.update()
             main_sprite.draw(screen)
             pygame.display.flip()
         else:
-            score_f(screen, True)
+            text(screen, 'death', (0, 0))
     if stop_all:
         pygame.quit()
         return False
@@ -302,6 +289,10 @@ if __name__ == '__main__':
     pygame.draw.rect(screen, (255, 255, 255), (75, 330, 166, 100), width=2)
     pygame.draw.rect(screen, (255, 255, 255), (316, 330, 166, 100), width=2)
     pygame.draw.rect(screen, (255, 255, 255), (557, 330, 166, 100), width=2)
+    text(screen, 'Выберите персонажа:', (50, 10))
+    text(screen, 'Выбрать', (80, 360))
+    text(screen, 'Выбрать', (326, 360))
+    text(screen, 'Выбрать', (567, 360))
     stop_all = False
     num = None
     while running_hello_level:
