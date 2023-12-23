@@ -11,6 +11,9 @@ from math import cos, pi, sin
 pygame.init()
 size = width, height = 500, 500
 screen = pygame.display.set_mode(size)
+FPS = 50
+WIDTH = 800
+HEIGHT = 800
 
 
 def load_image(name, colorkey=None):
@@ -27,6 +30,37 @@ def load_image(name, colorkey=None):
     else:
         image = image.convert_alpha()
     return image
+
+
+def terminate():
+    pygame.quit()
+    sys.exit()
+
+
+def start_screen(intro_text, name, scale):
+    fon = pygame.transform.scale(load_image(name), scale)
+    screen.blit(fon, (0, 0))
+    font = pygame.font.Font(None, 30)
+    text_coord = 50
+    clock = pygame.time.Clock()
+    for line in intro_text:
+        string_rendered = font.render(line, 1, pygame.Color('black'))
+        intro_rect = string_rendered.get_rect()
+        text_coord += 10
+        intro_rect.top = text_coord
+        intro_rect.x = 10
+        text_coord += intro_rect.height
+        screen.blit(string_rendered, intro_rect)
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+            elif event.type == pygame.KEYDOWN or \
+                    event.type == pygame.MOUSEBUTTONDOWN:
+                return  # начинаем игру
+        pygame.display.flip()
+        clock.tick(FPS)
 
 
 def text(screen, text, pos, font=50):
@@ -60,22 +94,22 @@ class Bomb(pygame.sprite.Sprite):
         self.center_x += self.v_x * self.clock2.tick() / 100
         self.rect.x = self.center_x + int(self.side * cos(self.corner * pi / 180)) - 25
         self.rect.y = self.center_y + int(self.side * sin(self.corner * pi / 180)) - 25
-        if self.rect.colliderect(sprite.rect):
+        if pygame.sprite.collide_mask(self, sprite):
             screen.fill((255, 0, 0))
             text(screen, 'death', (0, 0))
             self.image = self.image_boom
             death = True
 
 
-class Bomb2(pygame.sprite.Sprite):
-    image = load_image("bomb.png")
-    image_boom = load_image("boom.png")
+class LittleBadFish(pygame.sprite.Sprite):
+    image = pygame.transform.scale(load_image("little_bad_fish.png", -1), (85, 60))
+    image = pygame.transform.flip(image, True, False)
 
     def __init__(self, group, corner):
         # НЕОБХОДИМО вызвать конструктор родительского класса Sprite.
         # Это очень важно !!!
         super().__init__(group)
-        self.image = Bomb2.image
+        self.image = LittleBadFish.image
         self.rect = self.image.get_rect()
         self.corner = corner
         self.center_x = -400
@@ -90,7 +124,7 @@ class Bomb2(pygame.sprite.Sprite):
 
     def update(self):
         global death, score
-        self.image = Bomb2.image
+        self.image = LittleBadFish.image
         if start:
             self.corner += self.v_main * self.clock1.tick() / 100
             self.corner %= 360
@@ -106,27 +140,27 @@ class Bomb2(pygame.sprite.Sprite):
                 self.clock2 = pygame.time.Clock()
             self.rect.x = self.center_x + int(self.side * cos(self.corner * pi / 180)) - 25
             self.rect.y = self.center_y + int(self.side * sin(self.corner * pi / 180)) - 25
-            if self.rect.colliderect(sprite.rect):
+            if pygame.sprite.collide_mask(self, sprite):
                 screen.fill((255, 0, 0))
                 text(screen, 'death', (0, 0))
-                self.image = self.image_boom
+                # self.image = self.image_boom
                 death = True
 
 
 class Creature(pygame.sprite.Sprite):
-    image1_go_right = pygame.transform.scale(load_image("go_right.jpg", -1), (166, 80))
-    image1_go_down = pygame.transform.scale(load_image("go_down.jpg", -1), (72, 80))
-    image1_go_up = pygame.transform.scale(load_image("go_up.jpg", -1), (80, 80))
+    image1_go_right = pygame.transform.scale(load_image("go_right.jpg", -1), (125, 60))
+    image1_go_down = pygame.transform.scale(load_image("go_down.jpg", -1), (54, 60))
+    image1_go_up = pygame.transform.scale(load_image("go_up.jpg", -1), (60, 60))
     image1_go_left = pygame.transform.flip(image1_go_right, True, False)
 
-    image2_go_right = pygame.transform.scale(load_image("go_right2.png", -1), (166, 80))
-    image2_go_down = pygame.transform.scale(load_image("go_down2.png", -1), (72, 80))
-    image2_go_up = pygame.transform.scale(load_image("go_up2.png", -1), (80, 80))
+    image2_go_right = pygame.transform.scale(load_image("go_right2.png", -1), (125, 60))
+    image2_go_down = pygame.transform.scale(load_image("go_down2.png", -1), (54, 60))
+    image2_go_up = pygame.transform.scale(load_image("go_up2.png", -1), (60, 80))
     image2_go_left = pygame.transform.flip(image2_go_right, True, False)
 
-    image3_go_right = pygame.transform.scale(load_image("go_right3.png", -1), (166, 80))
-    image3_go_down = pygame.transform.scale(load_image("go_down3.png", -1), (72, 80))
-    image3_go_up = pygame.transform.scale(load_image("go_up3.png", -1), (80, 80))
+    image3_go_right = pygame.transform.scale(load_image("go_right3.png", -1), (125, 60))
+    image3_go_down = pygame.transform.scale(load_image("go_down3.png", -1), (54, 60))
+    image3_go_up = pygame.transform.scale(load_image("go_up3.png", -1), (60, 80))
     image3_go_left = pygame.transform.flip(image3_go_right, True, False)
 
     def __init__(self, group, num):
@@ -138,6 +172,7 @@ class Creature(pygame.sprite.Sprite):
             self.image = Creature.image2_go_right
         else:
             self.image = Creature.image3_go_right
+        self.mask = pygame.mask.from_surface(self.image)
         self.rect = self.image.get_rect()
         self.rect.x = 400
         self.rect.y = 400
@@ -206,6 +241,7 @@ class Creature(pygame.sprite.Sprite):
                 self.go_right = False
             self.rect.y += self.v_y * self.clock_y.tick() / 1000
             self.rect.x += self.v_x * self.clock_x.tick() / 1000
+            self.mask = pygame.mask.from_surface(self.image)
             # print('================', self.rect.x, self.rect.y, self.v_x, self.v_y)
         else:
             self.rect.y += self.v_y * self.clock_y.tick() / 100
@@ -213,12 +249,12 @@ class Creature(pygame.sprite.Sprite):
             # print(self.rect.x, self.rect.y, self.v_x, self.v_y)
         if self.rect.x < 0:
             self.rect.x = 0
-        if self.rect.x > 634:
-            self.rect.x = 634
+        if self.rect.x > 675:
+            self.rect.x = 675
         if self.rect.y < 0:
             self.rect.y = 0
-        if self.rect.y > 720:
-            self.rect.y = 720
+        if self.rect.y > 740:
+            self.rect.y = 740
 
 
 def level_with_bombs():
@@ -231,11 +267,12 @@ def level_with_bombs():
 
     corners = (30, 150, 270)
     for i in range(3):
-        Bomb2(all_sprites, corners[i])
+        LittleBadFish(all_sprites, corners[i])
 
     stop_all = False
     all_sprites.draw(screen)
-    screen.fill((0, 0, 255))
+    fon = pygame.transform.scale(load_image('fon.jpg'), (1364, 800))
+    screen.blit(fon, (0, 0))
     start = True
     score = 0
     while running_level_with_bombs:
@@ -254,7 +291,7 @@ def level_with_bombs():
                 corners = (30, 150, 270)
                 score = 0
                 for i in range(3):
-                    Bomb2(all_sprites, corners[i])
+                    LittleBadFish(all_sprites, corners[i])
 
             if event.type == pygame.KEYDOWN and event.key == pygame.K_DOWN and not sprite.go_down:
                 main_sprite.update(event)
@@ -277,7 +314,8 @@ def level_with_bombs():
                 main_sprite.update(event)
 
         if not death:
-            screen.fill((0, 0, 255))
+            # screen.fill('#7986CB')
+            screen.blit(fon, (0, 0))
             text(screen, 'score: ' + str(score), (0, 0))
             all_sprites.update()
             all_sprites.draw(screen)
@@ -287,9 +325,7 @@ def level_with_bombs():
         else:
             text(screen, 'death', (0, 0))
     if stop_all:
-        pygame.quit()
-        return False
-    return True
+        terminate()
 
 
 def level_with_bombs1():
@@ -307,7 +343,9 @@ def level_with_bombs1():
 
     stop_all = False
     all_sprites.draw(screen)
-    screen.fill('#7986CB')
+    # screen.fill('#7986CB')
+    fon = pygame.transform.scale(load_image('ship.jpg'), (800, 800))
+    screen.blit(fon, (0, 0))
     start = True
     death = False
     while running_level_with_bombs1:
@@ -351,7 +389,8 @@ def level_with_bombs1():
                 main_sprite.update(event)
 
         if not death:
-            screen.fill('#7986CB')
+            # screen.fill('#7986CB')
+            screen.blit(fon, (0, 0))
             text(screen, 'score: ' + str(score), (0, 0))
             if sprite_bomb1.center_x >= 800 + sprite_bomb1.side + 50:
                 score += 3
@@ -375,9 +414,7 @@ def level_with_bombs1():
             screen.fill((255, 0, 0))
             text(screen, 'death', (0, 0))
     if stop_all:
-        pygame.quit()
-        return False
-    return True
+        terminate()
 
 
 if __name__ == '__main__':
@@ -389,19 +426,19 @@ if __name__ == '__main__':
     # приветствие
     screen.fill('#5C6BC0')
     running_start = True
-    image1_go_right = pygame.transform.scale(load_image("go_right.jpg", -1), (166, 80))
-    image1_go_down = pygame.transform.scale(load_image("go_down.jpg", -1), (72, 80))
-    image1_go_up = pygame.transform.scale(load_image("go_up.jpg", -1), (80, 80))
+    image1_go_right = pygame.transform.scale(load_image("go_right.jpg", -1), (125, 60))
+    image1_go_down = pygame.transform.scale(load_image("go_down.jpg", -1), (54, 60))
+    image1_go_up = pygame.transform.scale(load_image("go_up.jpg", -1), (60, 60))
     image1_go_left = pygame.transform.flip(image1_go_right, True, False)
 
-    image2_go_right = pygame.transform.scale(load_image("go_right2.png", -1), (166, 80))
-    image2_go_down = pygame.transform.scale(load_image("go_down2.png", -1), (72, 80))
-    image2_go_up = pygame.transform.scale(load_image("go_up2.png", -1), (80, 80))
+    image2_go_right = pygame.transform.scale(load_image("go_right2.png", -1), (125, 60))
+    image2_go_down = pygame.transform.scale(load_image("go_down2.png", -1), (54, 60))
+    image2_go_up = pygame.transform.scale(load_image("go_up2.png", -1), (60, 60))
     image2_go_left = pygame.transform.flip(image2_go_right, True, False)
 
-    image3_go_right = pygame.transform.scale(load_image("go_right3.png", -1), (166, 80))
-    image3_go_down = pygame.transform.scale(load_image("go_down3.png", -1), (72, 80))
-    image3_go_up = pygame.transform.scale(load_image("go_up3.png", -1), (80, 80))
+    image3_go_right = pygame.transform.scale(load_image("go_right3.png", -1), (125, 60))
+    image3_go_down = pygame.transform.scale(load_image("go_down3.png", -1), (54, 60))
+    image3_go_up = pygame.transform.scale(load_image("go_up3.png", -1), (60, 60))
     image3_go_left = pygame.transform.flip(image3_go_right, True, False)
 
     running_hello_level = True
@@ -437,21 +474,20 @@ if __name__ == '__main__':
 
     # если не закрыли окно
     if not stop_all:
+        start_screen(["ЗАСТАВКА", "",
+                      "Правила игры",
+                      "Если в правилах несколько строк,",
+                      "приходится выводить их построчно"], 'ship.jpg', (800, 800))
         main_sprite = pygame.sprite.Group()
         sprite = Creature(main_sprite, num)
 
         # следующий уровень
         start = False
         death = False
-        if level_with_bombs1():  # опять проверяем, закрыто ли окно
-            # следующий уровень
-            time1 = time.time()
-            while True:
-                screen.fill('#673AB7')
-                text(screen, 'Поздравляем! Вы прошли этот уровень', (50, 200), 30)
-                if time.time() - time1 >= 5:
-                    break
-                pygame.display.flip()
-            if level_with_bombs():
-                pass
-
+        level_with_bombs1()
+        # следующий уровень
+        start_screen(["ЗАСТАВКА", "",
+                      "Правила игры",
+                      "Если в правилах несколько строк,",
+                      "приходится выводить их построчно"], 'fon.jpg', (1364, 800))
+        level_with_bombs()
