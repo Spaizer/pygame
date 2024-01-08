@@ -14,17 +14,17 @@ def level_underwater_castle(screen, num):
     all_sprites = pygame.sprite.Group()
 
     main_sprite = pygame.sprite.Group()
-    sprite = Creature(main_sprite, num)
+    sprite = Creature(main_sprite, num, 3)
 
     text(screen, 'score: ' + str(sprite.score), (0, 0))
 
     data = ((50, 20), (50, 700), (600, 50), (600, 700))
     for i in range(4):
         if data[i][0] < 400:
-            vx = random.randint(15, 30)
+            vx = random.randint(15, 20)
         else:
-            vx = random.randint(-30, -15)
-        vy = random.randint(-30, 30)
+            vx = random.randint(-20, -15)
+        vy = random.randint(-20, 20)
         BadFish(all_sprites, data[i], vx, vy, screen, sprite)
 
     stop_all = False
@@ -51,10 +51,10 @@ def level_underwater_castle(screen, num):
                 time1 = time.time()
                 for i in range(4):
                     if data[i][0] < 400:
-                        vx = random.randint(15, 30)
+                        vx = random.randint(15, 25)
                     else:
-                        vx = random.randint(-30, -15)
-                    vy = random.randint(-30, 30)
+                        vx = random.randint(-25, -15)
+                    vy = random.randint(-25, 25)
                     BadFish(all_sprites, data[i], vx, vy, screen, sprite)
                 sprite.rect.x = 400
                 sprite.rect.y = 400
