@@ -4,14 +4,17 @@ from load_image import load_image
 FPS = 50
 
 
-def start_screen(screen, intro_text, name, scale):
+def start_screen(screen, intro_text, name, scale, flag=False):
     fon = pygame.transform.scale(load_image(name), scale)
     screen.blit(fon, (0, 0))
     font = pygame.font.Font(None, 30)
     text_coord = 50
     clock = pygame.time.Clock()
     for line in intro_text:
-        string_rendered = font.render(line, 1, pygame.Color('black'))
+        if flag:
+            string_rendered = font.render(line, 1, pygame.Color('white'))
+        else:
+            string_rendered = font.render(line, 1, pygame.Color('black'))
         intro_rect = string_rendered.get_rect()
         text_coord += 10
         intro_rect.top = text_coord
@@ -23,8 +26,7 @@ def start_screen(screen, intro_text, name, scale):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
-            elif event.type == pygame.KEYDOWN or \
-                    event.type == pygame.MOUSEBUTTONDOWN:
+            elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                 return  # начинаем игру
         pygame.display.flip()
         clock.tick(FPS)
