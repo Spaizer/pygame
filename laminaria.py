@@ -19,7 +19,7 @@ class Laminaria(pygame.sprite.Sprite):
         self.image = image
         self.rect = self.image.get_rect()
         self.clock = pygame.time.Clock()
-        self.v = 30
+        self.v = 20
         self.rect.x = 800
         if num == 0:
             self.rect.y = center + 50
