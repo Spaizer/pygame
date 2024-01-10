@@ -136,7 +136,7 @@ if __name__ == '__main__':
                               "течению, так что в целом их движение подобно движению бомб.",
                               "Остаётся только пожелать тебе удачи, поскольку она тебе пригодится)"], 'fon.jpg',
                      (1364, 800))
-        level_with_little_bad_fish(screen, num)
+        num_of_death = level_with_little_bad_fish(screen, num)
         results.append(num_of_death)
         start_screen(screen, ["СРЕДИЗЕМНОМОРСКИЕ РАЗБОЙНИКИ", "",
                               "Удивлён, но ты всё же смог справиться с этим уровнем. Поздравляю!",
