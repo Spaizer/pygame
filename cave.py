@@ -16,7 +16,7 @@ class Cave(pygame.sprite.Sprite):
         self.image = image
         self.rect = self.image.get_rect()
         self.clock = pygame.time.Clock()
-        self.v = 25
+        self.v = 20
         self.rect.x = 0
         self.rect.y = 0
         self.num = num
@@ -25,7 +25,7 @@ class Cave(pygame.sprite.Sprite):
     def update(self):
         # global death
         self.rect.x -= self.v * self.clock.tick() / 100
-        if self.rect.x <= -760 and not self.flag:
+        if self.rect.x <= -790 and not self.flag:
             cave = Cave(self.group, int((self.num + 1) % 2))
             cave.rect.x = 800
             self.flag = True
