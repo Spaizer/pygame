@@ -12,7 +12,7 @@ def level_with_little_bad_fish(screen, num):
     all_sprites = pygame.sprite.Group()
 
     main_sprite = pygame.sprite.Group()
-    sprite = Creature(main_sprite, num)
+    sprite = Creature(main_sprite, num, 2)
 
     # Border(0, 0, width, 0)
     # Border(0, height, width, height)
