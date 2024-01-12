@@ -18,6 +18,7 @@ from level_4 import level_cave
 pygame.init()
 size = width, height = 500, 500
 screen = pygame.display.set_mode(size)
+pygame.display.set_caption('В НЕИЗВЕДАННЫХ ВОДАХ')
 horizontal_borders = pygame.sprite.Group()
 vertical_borders = pygame.sprite.Group()
 all_sprites = pygame.sprite.Group()

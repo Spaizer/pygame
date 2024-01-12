@@ -12,7 +12,6 @@ def start_screen(screen, intro_text, name, scale, flag=False, font_name='data/Bo
     text_coord = 90
     clock = pygame.time.Clock()
 
-    print(intro_text[0], 123)
     string_rendered = pygame.font.Font(font_name, 55).render(intro_text[0], 1, pygame.Color('white' if flag else 'black'))
     screen.blit(string_rendered, (10, 60))
     for line in intro_text[1:]:
